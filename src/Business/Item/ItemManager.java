@@ -1,6 +1,6 @@
 package Business.Item;
 
-import Persistance.ItemJSONDAO;
+import Persistance.JSON.ItemJSONDAO;
 
 import java.io.IOException;
 import java.util.ArrayList;

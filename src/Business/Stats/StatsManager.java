@@ -1,6 +1,7 @@
 package Business.Stats;
 
-import Persistance.StatsJSONDAO;
+import Persistance.StatsDAO;
+import Persistance.JSON.StatsJSONDAO;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -11,17 +12,19 @@ import java.util.List;
  * Proporciona métodos para cargar, actualizar y guardar estadísticas.
  */
 public class StatsManager {
+    private StatsDAO statsDAO;
 
+    public StatsManager() {
+        this.statsDAO = new StatsJSONDAO();
+    }
     /**
      * Carga las estadísticas desde un archivo JSON y las parsea en una lista de objetos Stats.
      *
-     * @param filePath Ruta del archivo JSON desde el que se leerán las estadísticas.
      * @return Una lista de objetos Stats que representan las estadísticas de los equipos.
      * @throws IOException Si hay un error al leer el archivo.
      */
-    public List<Stats> loadStats(String filePath) throws IOException {
-        StatsJSONDAO statsDAO = new StatsJSONDAO();
-        return statsDAO.readAndParseStats(filePath);
+    public List<Stats> loadStats() throws IOException {
+        return statsDAO.getStats();
     }
 
     /**
@@ -32,7 +35,7 @@ public class StatsManager {
      * @throws IOException Si hay un error al leer el archivo de estadísticas.
      */
     public Stats getStatsByTeamName(String team_name) throws IOException {
-        List<Stats> allStats = loadStats("Data/stats.json");
+        List<Stats> allStats = statsDAO.getStats();
 
         for (Stats stats : allStats) {
             if (stats.getTeamName().equalsIgnoreCase(team_name)) {
@@ -47,17 +50,14 @@ public class StatsManager {
      *
      * @param team_name El nombre del equipo al que se le crearán las estadísticas.
      * @param statsList La lista de estadísticas existente a la que se añadirá el nuevo objeto Stats.
-     * @param filePath Ruta del archivo JSON donde se guardarán las estadísticas.
      * @return El nuevo objeto Stats creado para el equipo.
      * @throws IOException Si hay un error al leer o guardar el archivo de estadísticas.
      * @throws JSONException Si hay un error en el formato JSON al guardar las estadísticas.
      */
-    public Stats createNewStats(String team_name, List<Stats> statsList, String filePath) throws IOException, JSONException {
+    public Stats createNewStats(String team_name, List<Stats> statsList) throws IOException, JSONException {
         Stats newStats = new Stats(team_name, 0, 0, 0, 0);
         statsList.add(newStats);
-
-        StatsJSONDAO statsDAO = new StatsJSONDAO();
-        statsDAO.saveStats(statsList, filePath);
+        statsDAO.saveStats(statsList);
 
         return newStats;
     }
@@ -82,19 +82,19 @@ public class StatsManager {
         // Incrementar KOs realizados y recibidos
         stats.addKODone();
         stats.addKOReceived();
+
+        // TODO: Actualizar json
     }
 
     /**
      * Guarda las estadísticas actualizadas de todos los equipos en el archivo JSON.
      *
      * @param statsList La lista de objetos Stats que contienen las estadísticas de los equipos.
-     * @param filePath Ruta del archivo JSON donde se guardarán las estadísticas.
      * @throws IOException Si hay un error al leer o guardar el archivo de estadísticas.
      * @throws JSONException Si hay un error en el formato JSON al guardar las estadísticas.
      */
-    public void saveStats(List<Stats> statsList, String filePath) throws IOException, JSONException {
-        StatsJSONDAO statsDAO = new StatsJSONDAO();
-        statsDAO.saveStats(statsList, filePath);
+    public void saveStats(List<Stats> statsList) throws IOException, JSONException {
+        statsDAO.saveStats(statsList);
     }
 
     /**

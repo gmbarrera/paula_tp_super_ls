@@ -3,11 +3,10 @@ package Business.Item;
 /**
  * Representa un ítem que puede ser utilizado en combate, ya sea como arma o armadura.
  */
-public class Item {
+public abstract class Item {
 
     private int item_id;
     private String item_name;
-    private String item_class; // Puede ser "Weapon" o "Armor".
     private int power;
     private int durability;
 
@@ -16,14 +15,12 @@ public class Item {
      *
      * @param item_id     Identificador único del ítem.
      * @param item_name   Nombre del ítem.
-     * @param item_class  Clase del ítem ("Weapon" o "Armor").
      * @param power       Poder del ítem (daño o defensa).
      * @param durability  Durabilidad del ítem.
      */
-    public Item(int item_id, String item_name, String item_class, int power, int durability) {
+    public Item(int item_id, String item_name, int power, int durability) {
         this.item_id = item_id;
         this.item_name = item_name;
-        this.item_class = item_class;
         this.power = power;
         this.durability = durability;
     }

@@ -1,7 +1,7 @@
 package Business.Character;
 
 import Persistance.CharacterDAO;
-import Persistance.CharacterJSONDAO;
+import Persistance.JSON.CharacterJSONDAO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -86,10 +86,12 @@ public class CharacterManager {
      * @return el objeto {@link Character} que coincide con el ID, o {@code null} si no se encuentra.
      */
     public Character getCharacter(int id) {
-        return characterDAO.getCharacters()
-                .stream()
-                .filter(character -> character.getId() == id)
-                .findFirst()
-                .orElse(null);
+        List<Character> characters = characterDAO.getCharacters();
+        for (Character character : characters) {
+            if (character.getId() == id) {
+                return character;
+            }
+        }
+        return null;
     }
 }

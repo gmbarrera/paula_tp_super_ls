@@ -1,5 +1,7 @@
 package Business.Team;
 
+import Business.Item.Item;
+
 /**
  * Clase que representa a un miembro de un equipo, con sus características como su ID, estrategia,
  * daño acumulado y estado de KO.
@@ -9,6 +11,7 @@ public class Member {
     private String strategy;          // Estrategia del miembro
     private double accumulated_damage; // Daño acumulado
     private boolean knocked_out;      // Estado de KO
+    private Item item;
 
     /**
      * Constructor para inicializar un miembro con un ID y una estrategia.
@@ -21,6 +24,7 @@ public class Member {
         this.strategy = strategy;
         this.accumulated_damage = 0.0;
         this.knocked_out = false;
+        this.item = null;
     }
 
     /**

@@ -85,7 +85,6 @@ public class Controller {
         String charactersPath = "Data/characters.json";
         String teamsPath = "Data/teams.json";
         String itemsPath = "Data/items.json";
-        String statsPath = "Data/stats.json";
 
         UIManager uiManager = new UIManager();
         switch (option) {
@@ -109,7 +108,7 @@ public class Controller {
                 if (choice > 0) {
                     String teamName = teamNames.get(choice - 1);
                     List<String> memberDetails = getTeamMembersDetails(teamName);
-                    List<String> stats = getStatsForTeam(teamName, statsPath);
+                    List<String> stats = getStatsForTeam(teamName);
                     uiManager.displayTeamDetails(teamName, controller, memberDetails, stats);
                 }
                 if (choice == 0) {
@@ -182,37 +181,23 @@ public class Controller {
      * Crea un nuevo equipo con los personajes seleccionados.
      *
      * @param teamName El nombre del nuevo equipo.
-     * @param characterIds Las IDs de los personajes que forman el equipo.
-     * @param filepath La ruta del archivo donde se guardarán los datos del equipo.
+     * @param members Los members del team.
      * @return true si el equipo fue creado con éxito, false en caso contrario.
      * @throws IOException Si ocurre un error al escribir en el archivo.
      * @throws JSONException Si ocurre un error al procesar el archivo JSON.
      */
-    public boolean createTeam(String teamName, List<String> characterIds) throws IOException, JSONException {
-        boolean teamCreated = true;
-        List<Character> characters = new ArrayList<>();
-        for (String id : characterIds) {
-            Character character = characterManager.getCharacter(Integer.parseInt(id));
-            if (character != null) {
-                characters.add(character);
-                teamCreated = true;
-            } else {
-                System.out.println("Character with ID " + id + " not found!");
-                teamCreated = false;
-            }
-        }
-        if (teamCreated) {
-            teamCreated = teamManager.createTeam(teamName);
-            Stats teamStats = new Stats(teamName, 0, 0, 0, 0);
-            statsManager.saveStats(List.of(teamStats), "Data/stats.json");
-        } else {
+    public boolean createTeam(String teamName, List<Member> members) throws IOException, JSONException {
+        boolean teamCreated = false;
+
+        teamCreated = teamManager.createTeam(teamName, members);
+
+        if (!teamCreated) {
             System.out.println("Team name " + teamName + " is not available. Please try again!");
             UIManager uiManager = new UIManager();
             Controller controller = new Controller();
-            uiManager.createTeamPrompt(controller, "filepath");
-
-
+            uiManager.createTeamPrompt(controller);
         }
+
         return teamCreated;
     }
 
@@ -279,20 +264,19 @@ public class Controller {
      * Obtiene las estadísticas de un equipo.
      *
      * @param teamName El nombre del equipo.
-     * @param filepath La ruta del archivo de estadísticas.
      * @return Una lista con las estadísticas del equipo.
      * @throws IOException Si ocurre un error al leer el archivo de estadísticas.
      * @throws JSONException Si ocurre un error al procesar el archivo JSON.
      */
-    public List<String> getStatsForTeam(String teamName, String filepath) throws IOException, JSONException {
+    public List<String> getStatsForTeam(String teamName) throws IOException, JSONException {
         Stats stats = statsManager.getStatsByTeamName(teamName);
         List<String> teamStats = new ArrayList<>();
 
         if (stats != null) {
             teamStats.add(stats.getDetails());
         } else {
-            List<Stats> statsList = statsManager.loadStats(filepath);
-            stats = statsManager.createNewStats(teamName, statsList, filepath);
+            List<Stats> statsList = statsManager.loadStats();
+            stats = statsManager.createNewStats(teamName, statsList);
             teamStats.add(stats.getDetails());
         }
 
@@ -329,15 +313,17 @@ public class Controller {
 		return this.teamManager.isTeamNameValid(teamName);
 	}
 
-	public boolean isCharacterValid(String id) {
-		this.characterManager.getCharacter(0);
-		this.characterManager.getCharacter("asdfsadf");
-
-		return false;
-	}
-
-
-
-
-
+    /**
+     *
+     * @param info
+     * @return
+     */
+    public Character findCharacter(String info) {
+        try {
+            int idNumerico = Integer.parseInt(info);
+            return this.characterManager.getCharacter(idNumerico);
+        } catch (Exception ignored) {
+            return this.characterManager.getCharacter(info);
+        }
+    }
 }

@@ -20,3 +20,10 @@ Todas las clases heredan implicitamente de Object
 
 Terminar TeamsDAO y TeamsJSONDAO y hacer pruebas
 
+Combate:
+- Se seleccionan 2 equipos
+- Se asignan items al azar a cada miembro (puede no asignarse)
+- Comienzan los turnos.
+- Un equipo por turno, los miembros atacan a los otros al azar.
+- si un item se rompe ese miembro no hace, pide otro item.
+- 

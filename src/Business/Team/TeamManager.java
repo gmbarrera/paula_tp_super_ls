@@ -4,15 +4,14 @@ import Business.Character.Character;
 import Business.Character.CharacterManager;
 import Business.Stats.Stats;
 
-import Persistance.StatsJSONDAO;
-import Persistance.TeamJSONDAO;
+import Persistance.JSON.StatsJSONDAO;
+import Persistance.TeamDAO;
+import Persistance.JSON.TeamJSONDAO;
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Random;
 
 /**
@@ -21,7 +20,7 @@ import java.util.Random;
 
 public class TeamManager {
 
-    private final TeamJSONDAO teamDAO;
+    private final TeamDAO teamDAO;
     private final CharacterManager characterManager;
     private final StatsJSONDAO statsDAO;
     private String filePath;
@@ -120,63 +119,16 @@ public class TeamManager {
      * @return true si el equipo fue creado exitosamente, false si hubo algÃºn error.
      * @throws IOException Si ocurre un error al leer o escribir los archivos.
      */
-    public boolean createTeam(String teamName) throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        List<Member> members = new ArrayList<>();
-
-        if (!isTeamNameValid(teamName)) {
-            return false;
-        }
-
-        for (int i = 0; i < 4; i++) {
-            System.out.printf("\nPlease enter name or id for character #%d: ", i + 1);
-            String input = scanner.nextLine();
-
-            Character selectedCharacter = null;
-            try {
-                int id = Integer.parseInt(input);
-                selectedCharacter = characterManager.getCharacter(id);
-            } catch (NumberFormatException e) {
-                selectedCharacter = characterManager.getCharacter(input);
-            }
-
-            if (selectedCharacter == null) {
-                System.out.println("Character not found! Please try again.");
-                i--;
-                continue;
-            }
-
-            String strategy = null;
-            while (strategy == null) {
-                System.out.printf("Game strategy for character #%d?\n", i + 1);
-                System.out.println("\t1) Balanced");
-                System.out.print("\tChoose an option: ");
-                try {
-                    int option = scanner.nextInt();
-                    scanner.nextLine();
-                    if (option == 1) {
-                        strategy = "Balanced";
-                    } else {
-                        System.out.println("Option not valid! Please choose a valid option.");
-                    }
-                } catch (InputMismatchException e) {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.nextLine();
-                }
-            }
-
-            Member member = new Member(selectedCharacter.getId(), strategy);
-            members.add(member);
-        }
-
-        Team new_team = new Team(teamName, members);
+    public boolean createTeam(String teamName, List<Member> members) throws IOException {
+        Team newTeam = new Team(teamName, members);
 
         try {
-            teamDAO.createTeam(new_team);
+            teamDAO.createTeam(newTeam);
+
             Stats stats = new Stats(teamName, 0, 0, 0, 0);  // Inicializamos con 0 para todos los valores
             List<Stats> statsList = new ArrayList<>();
             statsList.add(stats);
-            statsDAO.saveStats(statsList, "Data/stats.json"); // Guardar la lista de estadÃ­sticas
+            statsDAO.saveStats(statsList); // Guardar la lista de estadÃ­sticas
             return true;
 
         } catch (JSONException e) {
@@ -300,7 +252,6 @@ public class TeamManager {
      */
     public List<String> getTeamSummary(Team team) {
         List<String> summary = new ArrayList<>();
-
 
         for (Member member : team.getTeamMembers()) {
             Character character = characterManager.getCharacter(member.getMemberId());

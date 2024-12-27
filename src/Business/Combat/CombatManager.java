@@ -3,14 +3,13 @@ package Business.Combat;
 import Business.Character.Character;
 import Business.Character.CharacterManager;
 import Business.Item.Item;
-import Business.Item.ItemManager;
 import Business.Stats.Stats;
 import Business.Stats.StatsManager;
 import Business.Team.Member;
 import Business.Team.Team;
 import Business.Team.TeamManager;
-import Persistance.CharacterJSONDAO;
-import Persistance.TeamJSONDAO;
+import Persistance.JSON.CharacterJSONDAO;
+import Persistance.JSON.TeamJSONDAO;
 import Presentation.Controller;
 
 import java.io.IOException;

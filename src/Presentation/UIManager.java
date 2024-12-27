@@ -1,5 +1,7 @@
 package Presentation;
 
+import Business.Character.Character;
+import Business.Team.Member;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -60,12 +62,12 @@ public class UIManager {
      */
     public void displayMainMenu(Controller controller) {
         System.out.println("""
-                            \t1) List Characters
-                            \t2) Manage Teams
-                            \t3) List Items
-                            \t4) Simulate Combat
-                            
-                            \t5) Exit""");
+                \t1) List Characters
+                \t2) Manage Teams
+                \t3) List Items
+                \t4) Simulate Combat
+                
+                \t5) Exit""");
 
         System.out.print("\nChoose an option: ");
         try {
@@ -84,7 +86,7 @@ public class UIManager {
     /**
      * Solicita al usuario que elija una opción dentro de un rango permitido.
      *
-     * @param max_index El índice máximo de opciones disponibles.
+     * @param max_index  El índice máximo de opciones disponibles.
      * @param controller El objeto Controller que maneja la lógica de la aplicación.
      * @return La opción seleccionada por el usuario.
      */
@@ -120,7 +122,7 @@ public class UIManager {
      * Muestra los detalles de un personaje junto con los nombres de los equipos a los que pertenece.
      *
      * @param character_details Una cadena con los detalles del personaje.
-     * @param team_names Una lista de nombres de equipos a los que pertenece el personaje.
+     * @param team_names        Una lista de nombres de equipos a los que pertenece el personaje.
      */
     public void displayCharacterDetails(String character_details, List<String> team_names) {
         Controller controller = new Controller();
@@ -146,7 +148,7 @@ public class UIManager {
      *
      * @param controller El objeto Controller que maneja la lógica de la aplicación.
      * @param team_names Una lista de nombres de equipos.
-     * @param filepath La ruta al archivo donde se almacenan los datos de equipos.
+     * @param filepath   La ruta al archivo donde se almacenan los datos de equipos.
      */
     public void showTeamManagementMenu(Controller controller, List<String> team_names, String filepath) {
         System.out.println("""
@@ -163,7 +165,7 @@ public class UIManager {
             scanner.nextLine();
 
             switch (option) {
-                case 1 -> createTeamPrompt(controller, filepath);
+                case 1 -> createTeamPrompt(controller);
                 case 2 -> displayTeamNames(team_names);
                 case 3 -> deleteTeam(controller);
                 case 4 -> displayMainMenu(controller);
@@ -197,10 +199,10 @@ public class UIManager {
     /**
      * Muestra los detalles de un equipo, incluyendo su nombre, miembros y estadísticas.
      *
-     * @param team_name     El nombre del equipo cuyos detalles se mostrarán.
-     * @param controller    El objeto Controller que gestiona la lógica de la aplicación.
+     * @param team_name      El nombre del equipo cuyos detalles se mostrarán.
+     * @param controller     El objeto Controller que gestiona la lógica de la aplicación.
      * @param member_details Una lista con los detalles de los miembros del equipo.
-     * @param stats         Una lista con las estadísticas del equipo.
+     * @param stats          Una lista con las estadísticas del equipo.
      */
     public void displayTeamDetails(String team_name, Controller controller, List<String> member_details, List<String> stats) {
         System.out.println("\tTeam name: " + team_name + "\n");
@@ -224,46 +226,67 @@ public class UIManager {
      * Solicita al usuario los datos necesarios para crear un equipo.
      *
      * @param controller El objeto Controller que gestiona la lógica de la aplicación.
-     * @param filepath La ruta del archivo donde se almacenan los datos de los equipos.
      */
-    public void createTeamPrompt(Controller controller, String filepath) {
-    	// Solicitar el nombre del team
-    	String teamName = "";
-    	
+    public void createTeamPrompt(Controller controller) {
+        // Solicitar el nombre del team
+        String teamName = "";
+        List<Member> members = new ArrayList<>();
+
         try {
-			do {
-				System.out.print("Please enter the team's name: ");
-			    teamName = scanner.nextLine();
-			} while (!controller.isTeamNameValid(teamName));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        List<String> characterIds = new ArrayList<>();
+            do {
+                System.out.print("Please enter the team's name: ");
+                teamName = scanner.nextLine();
+            } while (!controller.isTeamNameValid(teamName));
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println("Creando el team " + teamName);
 
         // Solicitar los miembros del team.
-        for (int i=0; i<4; i++) {
-        	String id = "";
-        	
-        	do {
-	        	System.out.println("Please enter the id or name for character: ");
-	        	id = scanner.nextLine();
-        	}
-        	while (!controller.isCharacterValid(id));
-        	
-        	characterIds.add(id);
+        for (int i = 0; i < 4; i++) {
+            String info = "";
+            Character character = null;
+
+            do {
+                System.out.printf("Please enter the id or name for character #%d: ", i + 1);
+                info = scanner.nextLine();
+                character = controller.findCharacter(info);
+                if (character == null) {
+                    System.out.println("No lo encontre");  // TODO:
+                }
+            } while (character == null);
+
+            String strategy = null;
+            while (strategy == null) {
+                System.out.printf("Game strategy for character %s?\n", character.getName());
+                System.out.println("\t1) Balanced");
+                System.out.print("\tChoose an option: ");
+                try {
+                    int option = scanner.nextInt();
+                    scanner.nextLine();
+                    if (option == 1) {
+                        strategy = "Balanced";
+                    } else {
+                        System.out.println("Option not valid! Please choose a valid option.");
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Invalid input. Please enter a number.");
+                    scanner.nextLine();
+                }
+            }
+            members.add(new Member(character.getId(), strategy));
         }
-        
-        
+
         // Crear el team
         try {
-            boolean teamCreated = controller.createTeam(teamName, characterIds);
+            boolean teamCreated = controller.createTeam(teamName, members);
             if (teamCreated) {
                 System.out.printf("Team '%s' has been successfully created!\n", teamName);
                 displayMainMenu(controller);
             } else {
                 System.out.println("Error creating the team. Please try again.");
+                // TODO:
             }
         } catch (IOException e) {
             System.out.println("Error creating team: " + e.getMessage());
@@ -339,7 +362,7 @@ public class UIManager {
      * @param maxIndex El índice máximo permitido para la selección (el número total de equipos).
      * @param team_num El número del equipo que se debe elegir (usado para el mensaje de solicitud).
      * @return El índice (basado en 0) del equipo seleccionado por el usuario.
-     *         Si el usuario elige una opción inválida, el método sigue solicitando la entrada hasta que sea válida.
+     * Si el usuario elige una opción inválida, el método sigue solicitando la entrada hasta que sea válida.
      */
     public int getTeamChoice(int maxIndex, int team_num) {
         System.out.print("Choose team #" + team_num + ": ");

@@ -2,9 +2,8 @@ package Test;
 
 import Business.Character.Character;
 import Business.Character.CharacterManager;
-import Persistance.CharacterAPIDAO;
 import Persistance.CharacterDAO;
-import Persistance.CharacterJSONDAO;
+import Persistance.JSON.CharacterJSONDAO;
 
 import java.io.IOException;
 import java.util.List;
